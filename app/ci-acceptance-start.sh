@@ -4,6 +4,9 @@ set -euo pipefail
 : "${EVY_POSTGRES_PASSWORD:?Dedicated database required}"
 : "${EVY_SECRET_KEY:?Dedicated application secret required}"
 : "${EVY_REDIS_URL:?Dedicated cache required}"
+: "${CI_EVENTYAY_HOSTPORT:?Private service address required}"
+export EVY_SITE_URL="http://$CI_EVENTYAY_HOSTPORT"
+export EVY_ALLOWED_HOSTS="$(python -c 'import os,json; print(json.dumps([os.environ["CI_EVENTYAY_HOSTPORT"].split(":")[0],"localhost","127.0.0.1"]))')"
 export POSTGRES_HOST="$EVY_POSTGRES_HOST"
 export POSTGRES_PORT="$EVY_POSTGRES_PORT"
 # Private acceptance only. No public domain, payment credentials, or external email.
