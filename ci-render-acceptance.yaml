@@ -1,0 +1,62 @@
+services:
+  - type: pserv
+    name: ci-native-eventyay-acceptance
+    runtime: docker
+    region: frankfurt
+    plan: standard
+    branch: infra/ci-native-acceptance-20261125
+    autoDeployTrigger: off
+    dockerfilePath: ./app/Dockerfile.ci-acceptance
+    dockerContext: ./app
+    disk:
+      name: ci-eventyay-data
+      mountPath: /usr/src/app/eventyay/data
+      sizeGB: 5
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: CI_EVENTYAY_HOSTPORT
+        fromService:
+          name: ci-native-eventyay-acceptance
+          type: pserv
+          property: hostport
+      - key: EVY_POSTGRES_HOST
+        fromDatabase:
+          name: ci-eventyay-db
+          property: host
+      - key: EVY_POSTGRES_PORT
+        fromDatabase:
+          name: ci-eventyay-db
+          property: port
+      - key: EVY_POSTGRES_USER
+        fromDatabase:
+          name: ci-eventyay-db
+          property: user
+      - key: EVY_POSTGRES_PASSWORD
+        fromDatabase:
+          name: ci-eventyay-db
+          property: password
+      - key: EVY_POSTGRES_DB
+        fromDatabase:
+          name: ci-eventyay-db
+          property: database
+      - key: EVY_REDIS_URL
+        fromService:
+          name: ci-eventyay-cache
+          type: keyvalue
+          property: connectionString
+      - key: EVY_SECRET_KEY
+        generateValue: true
+  - type: keyvalue
+    name: ci-eventyay-cache
+    region: frankfurt
+    plan: starter
+    ipAllowList: []
+    maxmemoryPolicy: noeviction
+databases:
+  - name: ci-eventyay-db
+    region: frankfurt
+    plan: basic_1gb
+    postgresMajorVersion: "15"
+    databaseName: ci_eventyay
+    ipAllowList: []
